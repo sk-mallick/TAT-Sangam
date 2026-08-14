@@ -30,6 +30,40 @@ if ($isLocal) {
     define('DB_PORT', 3306);
 }
 
+// ── Automatic Table & Schema Initialization ─────────────────
+function autoInitDatabase($conn) {
+    try {
+        // Create users table if it doesn't exist
+        $createTableSql = "CREATE TABLE IF NOT EXISTS `users` (
+            `id` INT AUTO_INCREMENT PRIMARY KEY,
+            `name` VARCHAR(100) NOT NULL,
+            `reg_no` VARCHAR(50) NOT NULL UNIQUE,
+            `password` VARCHAR(255) NOT NULL,
+            `branch` VARCHAR(20) NOT NULL,
+            `semester` VARCHAR(10) DEFAULT '7th',
+            `grp` VARCHAR(5) NOT NULL,
+            `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            `last_login` TIMESTAMP NULL
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci";
+        
+        $conn->query($createTableSql);
+
+        // Seed default admin account if not already present
+        $adminCheck = $conn->query("SELECT `id` FROM `users` WHERE `reg_no` = 'admin' LIMIT 1");
+        if ($adminCheck && $adminCheck->num_rows === 0) {
+            $adminPass = password_hash('admin123', PASSWORD_BCRYPT);
+            $stmt = $conn->prepare("INSERT INTO `users` (`name`, `reg_no`, `password`, `branch`, `grp`) VALUES ('Administrator', 'admin', ?, 'ADMIN', '1')");
+            if ($stmt) {
+                $stmt->bind_param('s', $adminPass);
+                $stmt->execute();
+                $stmt->close();
+            }
+        }
+    } catch (Throwable $e) {
+        error_log('Database auto-init error: ' . $e->getMessage());
+    }
+}
+
 // ── Database Connection Function ────────────────────────────
 function getDB() {
     try {
@@ -43,6 +77,10 @@ function getDB() {
             exit;
         }
         $conn->set_charset('utf8mb4');
+        
+        // Automatically ensure tables & default accounts are created
+        autoInitDatabase($conn);
+        
         return $conn;
     } catch (Throwable $e) {
         http_response_code(500);
