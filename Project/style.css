@@ -38,8 +38,8 @@
 
   --bw: 2px;
   --bw-thick: 3px;
-  --r: 12px;
-  --r-sm: 8px;
+  --r: 6px;
+  --r-sm: 4px;
   /* Viewport-aware card height: never tiny, never taller than the screen */
   --card-height: clamp(400px, 56vh, 580px);
 }
