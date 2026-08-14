@@ -71,9 +71,8 @@ function applyThemeIcons(theme) {
         icon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
     });
     document.querySelectorAll('.theme-toggle').forEach(btn => {
-        const label = theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
-        btn.setAttribute('data-tooltip', label);
-        btn.setAttribute('aria-label', label);
+        // Header buttons show no hover tooltip; aria-label carries the name.
+        btn.setAttribute('aria-label', theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
     });
 }
 

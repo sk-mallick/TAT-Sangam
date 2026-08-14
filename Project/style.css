@@ -733,6 +733,11 @@ a { color: var(--primary); font-weight: 700; }
   [data-tooltip]:hover::before { display: none; }
 }
 
+/* No hover tooltips in the header — the buttons there are self-evident and the
+   tooltip overlapped the bar. aria-label still carries the accessible name. */
+.app-header [data-tooltip]:hover::after,
+.app-header [data-tooltip]:hover::before { display: none; }
+
 #daily-timetable [data-tooltip]:hover::after,
 .calendar-day[data-tooltip]:hover::after,
 .link-wrapper [data-tooltip]:hover::after { bottom: auto; top: calc(100% + 8px); right: 0; }
