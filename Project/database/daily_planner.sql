@@ -1,7 +1,13 @@
 -- ============================================================
---  tat_sangam.sql — Database setup for My Daily Planner
---  Run this file in phpMyAdmin or MySQL CLI to create the
---  database, users table, and seed the default admin account.
+--  daily_planner.sql — Database setup for My Daily Planner
+--
+--  [FOR LOCAL XAMPP]:
+--  Import this entire file into phpMyAdmin or MySQL CLI.
+--
+--  [FOR INFINITYFREE]:
+--  1. Open phpMyAdmin from your InfinityFree control panel.
+--  2. Click on your database (if0_42656834_tat_sangam).
+--  3. Click "SQL" tab and run the CREATE TABLE & INSERT below.
 -- ============================================================
 
 CREATE DATABASE IF NOT EXISTS tat_sangam

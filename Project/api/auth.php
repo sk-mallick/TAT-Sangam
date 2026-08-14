@@ -15,35 +15,8 @@ header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: POST, GET');
 header('Access-Control-Allow-Headers: Content-Type');
 
-// ── Database Configuration ──────────────────────────────────
-define('DB_HOST', 'localhost');
-define('DB_USER', 'root');
-define('DB_PASS', '');           // Default XAMPP — no password
-define('DB_NAME', 'tat_sangam');
-
-// ── Database Connection ─────────────────────────────────────
-function getDB() {
-    try {
-        $conn = @new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
-        if ($conn->connect_error) {
-            http_response_code(500);
-            echo json_encode([
-                'success' => false,
-                'message' => 'Database connection failed: ' . $conn->connect_error . '. Ensure MySQL is running in XAMPP and the database "' . DB_NAME . '" exists.'
-            ]);
-            exit;
-        }
-        $conn->set_charset('utf8mb4');
-        return $conn;
-    } catch (Throwable $e) {
-        http_response_code(500);
-        echo json_encode([
-            'success' => false,
-            'message' => 'Database error: ' . $e->getMessage()
-        ]);
-        exit;
-    }
-}
+// Include database connection & environment configuration
+require_once __DIR__ . '/db.php';
 
 // ── Helper: Send JSON Response ──────────────────────────────
 function respond($success, $message = '', $data = []) {

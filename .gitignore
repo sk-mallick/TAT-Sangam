@@ -18,4 +18,5 @@ ehthumbs_vista.db
 
 # Logs & Temporary Files
 *.log
+*.zip
 .env
