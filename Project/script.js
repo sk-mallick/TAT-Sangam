@@ -195,7 +195,7 @@ function exportUserData() {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `daily_planner_${currentUser}_backup.json`;
+        a.download = `tat_sangam_${currentUser}_backup.json`;
         a.click();
         URL.revokeObjectURL(url);
     } catch (error) {

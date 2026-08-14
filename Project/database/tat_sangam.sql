@@ -1,5 +1,5 @@
 -- ============================================================
---  daily_planner.sql — Database setup for My Daily Planner
+--  tat_sangam.sql — Database setup for TAT SANGAM
 --
 --  [FOR LOCAL XAMPP]:
 --  Import this entire file into phpMyAdmin or MySQL CLI.
