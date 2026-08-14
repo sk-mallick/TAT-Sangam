@@ -38,8 +38,8 @@
 
   --bw: 2px;
   --bw-thick: 3px;
-  --r: 8px;
-  --r-sm: 5px;
+  --r: 12px;
+  --r-sm: 8px;
   /* Viewport-aware card height: never tiny, never taller than the screen */
   --card-height: clamp(400px, 56vh, 580px);
 }
@@ -201,6 +201,7 @@ a { color: var(--primary); font-weight: 700; }
   border: var(--bw-thick) solid var(--ink);
   border-radius: var(--r);
   box-shadow: var(--sh-lg);
+  overflow: hidden;
 }
 .hover-card:hover { box-shadow: 7px 7px 0 var(--ink); }
 
@@ -208,6 +209,8 @@ a { color: var(--primary); font-weight: 700; }
   background-color: transparent;
   border-bottom: var(--bw) solid var(--ink);
   padding: 0.7rem 0.9rem;
+  border-top-left-radius: calc(var(--r) - 3px);
+  border-top-right-radius: calc(var(--r) - 3px);
 }
 .card-header.d-flex { flex-wrap: wrap; gap: 0.5rem; }
 .card-header .btn-group { flex-shrink: 0; }
@@ -241,7 +244,11 @@ a { color: var(--primary); font-weight: 700; }
   border-bottom: var(--bw) solid var(--ink) !important;
   margin-bottom: 0.9rem;
 }
-.card-body { background-color: var(--surface); }
+.card-body {
+  background-color: var(--surface);
+  border-bottom-left-radius: calc(var(--r) - 3px);
+  border-bottom-right-radius: calc(var(--r) - 3px);
+}
 
 /* ---------- Clock ---------- */
 #clockTime {
@@ -297,18 +304,19 @@ a { color: var(--primary); font-weight: 700; }
   background: var(--surface-2);
   border: var(--bw) solid var(--ink);
   border-radius: var(--r-sm);
-  padding: 2px;
-  gap: 2px;
+  padding: 3px;
+  gap: 3px;
   box-shadow: var(--sh-sm);
+  overflow: hidden;
 }
 .card-header .btn-group .btn {
   border: none;
   box-shadow: none;
   transform: none;
-  border-radius: 3px !important;
+  border-radius: calc(var(--r-sm) - 2px) !important;
   margin: 0;
   min-width: 30px;
-  padding: 0.32rem 0.5rem;
+  padding: 0.35rem 0.65rem;
   font-size: 0.78rem;
   line-height: 1;
   background: transparent;
@@ -316,6 +324,10 @@ a { color: var(--primary); font-weight: 700; }
   text-transform: uppercase;
   letter-spacing: 0.2px;
   font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
 }
 .card-header .btn-group .btn:hover { background: var(--warning); color: var(--ink); transform: none; box-shadow: none; }
 .card-header .btn-group .btn-outline-success:hover { background: var(--success); color: var(--ink); }
