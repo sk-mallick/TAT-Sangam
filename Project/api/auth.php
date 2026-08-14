@@ -1,6 +1,6 @@
 <?php
 // ============================================================
-//  auth.php — Single PHP backend for My Daily Planner Auth
+//  auth.php — Single PHP backend for TAT SANGAM Auth
 //  Handles: register, login, check_session, logout
 //  All requests via POST with 'action' parameter
 // ============================================================

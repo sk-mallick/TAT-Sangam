@@ -1,6 +1,6 @@
-# 📅 My Daily Planner
+# 📅 TAT SANGAM
 
-A student daily planner web app — timetable, to-do list, quick links, and a live clock. Built with plain HTML, CSS, JavaScript, and Bootstrap 5. All data is stored locally in the browser (localStorage), no backend needed.
+A student daily planner & academic portal web app — timetable, to-do list, quick links, and live clock with PHP & MySQL authentication.
 
 ## 🚀 Getting Started
 

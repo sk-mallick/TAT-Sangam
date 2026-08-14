@@ -1,5 +1,5 @@
 // ============================================================
-//  script.js — Main app logic for My Daily Planner
+//  script.js — Main app logic for TAT SANGAM
 //  Fixes & upgrades in this version:
 //   • Removed top-level logoutBtn listener that could crash the
 //     whole script on pages where the button doesn't exist

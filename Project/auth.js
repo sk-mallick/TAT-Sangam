@@ -1,5 +1,5 @@
 // ============================================================
-//  auth.js — Authentication for My Daily Planner
+//  auth.js — Authentication for TAT SANGAM
 //  Server-side auth via PHP + MySQL backend
 //  • Passwords hashed with bcrypt on server
 //  • PHP sessions for login state
