@@ -257,21 +257,27 @@ function handleImportData(event) {
 }
 
 // Handle logout
-function handleLogout() {
+async function handleLogout(event) {
+    if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
+
     const finish = async () => {
         try {
-            // Destroy server session
-            if (typeof logout === 'function') {
-                await logout();
-                return; // logout() handles redirect
-            }
+            const formData = new FormData();
+            formData.append('action', 'logout');
+            await fetch('api/auth.php', {
+                method: 'POST',
+                body: formData
+            });
         } catch (error) {
             console.error('Error during server logout:', error);
         }
         try {
             localStorage.removeItem('currentUser');
         } catch (error) {
-            console.error('Error during logout:', error);
+            console.error('Error clearing localStorage on logout:', error);
         }
         window.location.href = 'login.html';
     };
@@ -281,9 +287,10 @@ function handleLogout() {
         appContent.classList.add('logging-out');
         setTimeout(finish, 260);
     } else {
-        finish();
+        await finish();
     }
 }
+window.handleLogout = handleLogout;
 
 // ------------------------------------------------------------
 // Todo Management

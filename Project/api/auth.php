@@ -86,16 +86,13 @@ switch ($action) {
         }
         $stmt->close();
 
-        // Hash password with bcrypt
-        $hashed = password_hash($password, PASSWORD_BCRYPT);
-
-        // Insert user
+        // Store password directly as plain text
         $stmt = $conn->prepare('INSERT INTO users (name, reg_no, password, branch, grp) VALUES (?, ?, ?, ?, ?)');
         if (!$stmt) {
             $conn->close();
             respond(false, 'Database query error (INSERT): ' . $conn->error);
         }
-        $stmt->bind_param('sssss', $name, $reg_no, $hashed, $branch, $grp);
+        $stmt->bind_param('sssss', $name, $reg_no, $password, $branch, $grp);
 
         if ($stmt->execute()) {
             $stmt->close();
@@ -140,8 +137,9 @@ switch ($action) {
         $user = $result->fetch_assoc();
         $stmt->close();
 
-        // Verify password
-        if (!password_verify($password, $user['password'])) {
+        // Verify password directly (plain text, with legacy bcrypt hash fallback)
+        $passwordMatches = ($password === $user['password']) || password_verify($password, $user['password']);
+        if (!$passwordMatches) {
             $conn->close();
             respond(false, 'Incorrect password. Please try again.');
         }
@@ -198,7 +196,14 @@ switch ($action) {
     //  LOGOUT
     // ─────────────────────────────────────────────────────────
     case 'logout':
-        session_unset();
+        $_SESSION = [];
+        if (ini_get("session.use_cookies")) {
+            $params = session_get_cookie_params();
+            setcookie(session_name(), '', time() - 42000,
+                $params["path"], $params["domain"],
+                $params["secure"], $params["httponly"]
+            );
+        }
         session_destroy();
         respond(true, 'Logged out successfully');
         break;

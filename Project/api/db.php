@@ -48,13 +48,11 @@ function autoInitDatabase($conn) {
         
         $conn->query($createTableSql);
 
-        // Seed default admin account if not already present
+        // Seed default admin account if not already present (plain text password: admin123)
         $adminCheck = $conn->query("SELECT `id` FROM `users` WHERE `reg_no` = 'admin' LIMIT 1");
         if ($adminCheck && $adminCheck->num_rows === 0) {
-            $adminPass = password_hash('admin123', PASSWORD_BCRYPT);
-            $stmt = $conn->prepare("INSERT INTO `users` (`name`, `reg_no`, `password`, `branch`, `grp`) VALUES ('Administrator', 'admin', ?, 'ADMIN', '1')");
+            $stmt = $conn->prepare("INSERT INTO `users` (`name`, `reg_no`, `password`, `branch`, `grp`) VALUES ('Administrator', 'admin', 'admin123', 'ADMIN', '1')");
             if ($stmt) {
-                $stmt->bind_param('s', $adminPass);
                 $stmt->execute();
                 $stmt->close();
             }
