@@ -56,10 +56,19 @@ async function authRequest(action, data = {}) {
             body: formData
         });
 
-        return await response.json();
+        const text = await response.text();
+        try {
+            return JSON.parse(text);
+        } catch (parseError) {
+            console.error(`Auth request (${action}) returned non-JSON response:`, text);
+            return {
+                success: false,
+                message: 'Server returned an invalid response. Please verify your database connection and server setup.'
+            };
+        }
     } catch (error) {
         console.error(`Auth request (${action}) failed:`, error);
-        return { success: false, message: 'Network error. Please check your connection.' };
+        return { success: false, message: 'Network error. Please check your connection or server.' };
     }
 }
 

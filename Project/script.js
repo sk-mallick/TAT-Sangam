@@ -216,7 +216,7 @@ function handleImportData(event) {
             if (!data || typeof data !== 'object') {
                 throw new Error("Invalid backup format: root must be an object.");
             }
-            
+
             const currentUser = localStorage.getItem('currentUser');
             if (!currentUser) {
                 alert("No logged in user found. Please login first.");
@@ -683,22 +683,61 @@ function updateClock() {
 // ------------------------------------------------------------
 // Timetable Data — 7th Semester master timetable (w.e.f. 20 July 2026)
 // The schedule shown depends on the branch the user picked at signup.
-// All branch schedules live in timetable-data.js (BRANCH_TIMETABLES),
+// All branch schedules are loaded dynamically from timetable.json,
 // keyed by the signup branch value (CSE-A, CST-B, CST-IT, …).
 // ------------------------------------------------------------
 const DEFAULT_BRANCH = 'CST-B';
+
+// In-memory cache of all branch schedules loaded from timetable.json
+let branchTimetables = {};
+let timetableLoaded = false;
 
 // Active timetable ({ Monday: [...], ... }); populated from the user's branch.
 let timetable = {};
 
 function setBranchTimetable(branch) {
-    const all = (typeof BRANCH_TIMETABLES !== 'undefined') ? BRANCH_TIMETABLES : {};
     // Fall back to the default branch for unknown branches (e.g. the admin account)
-    timetable = all[branch] || all[DEFAULT_BRANCH] || {};
+    timetable = branchTimetables[branch] || branchTimetables[DEFAULT_BRANCH] || {};
 }
 
-// Start with the default so the view has data even before the user loads
-setBranchTimetable(DEFAULT_BRANCH);
+async function loadTimetableData() {
+    try {
+        const response = await fetch('timetable.json');
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: Failed to fetch timetable.json`);
+        }
+        branchTimetables = await response.json();
+        timetableLoaded = true;
+
+        // Apply schedule for the current user's branch
+        const currentUser = localStorage.getItem('currentUser');
+        let branch = DEFAULT_BRANCH;
+        if (currentUser) {
+            const userData = JSON.parse(localStorage.getItem(`user_${currentUser}`) || '{}');
+            if (userData.branch) branch = userData.branch;
+        }
+        setBranchTimetable(branch);
+
+        // Re-render current timetable view once loaded
+        if (currentView === 'today') {
+            renderTimetable(selectedDate.toLocaleDateString("en-US", { weekday: "long" }));
+        } else if (currentView === 'week') {
+            renderCalendar();
+        }
+    } catch (error) {
+        console.error('Error loading timetable.json:', error);
+        timetableLoaded = true;
+        const container = document.getElementById("daily-timetable");
+        if (container) {
+            container.innerHTML = `
+                <div class="text-center text-muted p-4">
+                    <i class="fas fa-exclamation-triangle fa-2x mb-3 text-warning"></i>
+                    <p>Unable to load timetable data.</p>
+                </div>
+            `;
+        }
+    }
+}
 
 // ------------------------------------------------------------
 // Timetable rendering
@@ -722,6 +761,16 @@ function renderTimetable(day) {
 
     // Prevent countdown intervals from stacking on every re-render
     clearTimetableIntervals();
+
+    if (!timetableLoaded) {
+        container.innerHTML = `
+            <div class="text-center text-muted p-4">
+                <div class="spinner-border spinner-border-sm text-primary mb-2" role="status"></div>
+                <p>Loading schedule...</p>
+            </div>
+        `;
+        return;
+    }
 
     const todaySchedule = timetable[day] || [];
 
@@ -941,8 +990,9 @@ document.addEventListener('DOMContentLoaded', function () {
         btn.addEventListener('click', toggleTheme);
     });
 
-    // Load user data
+    // Load user data & timetable JSON
     loadUserData();
+    loadTimetableData();
 
     // Initialize clock
     updateClock();

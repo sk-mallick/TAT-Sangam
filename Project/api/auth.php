@@ -5,6 +5,10 @@
 //  All requests via POST with 'action' parameter
 // ============================================================
 
+// Turn off HTML error output to prevent corrupting JSON responses
+ini_set('display_errors', '0');
+error_reporting(E_ALL);
+
 session_start();
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
@@ -15,18 +19,30 @@ header('Access-Control-Allow-Headers: Content-Type');
 define('DB_HOST', 'localhost');
 define('DB_USER', 'root');
 define('DB_PASS', '');           // Default XAMPP — no password
-define('DB_NAME', 'daily_planner');
+define('DB_NAME', 'tat_sangam');
 
 // ── Database Connection ─────────────────────────────────────
 function getDB() {
-    $conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
-    if ($conn->connect_error) {
+    try {
+        $conn = @new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
+        if ($conn->connect_error) {
+            http_response_code(500);
+            echo json_encode([
+                'success' => false,
+                'message' => 'Database connection failed: ' . $conn->connect_error . '. Ensure MySQL is running in XAMPP and the database "' . DB_NAME . '" exists.'
+            ]);
+            exit;
+        }
+        $conn->set_charset('utf8mb4');
+        return $conn;
+    } catch (Throwable $e) {
         http_response_code(500);
-        echo json_encode(['success' => false, 'message' => 'Database connection failed']);
+        echo json_encode([
+            'success' => false,
+            'message' => 'Database error: ' . $e->getMessage()
+        ]);
         exit;
     }
-    $conn->set_charset('utf8mb4');
-    return $conn;
 }
 
 // ── Helper: Send JSON Response ──────────────────────────────
@@ -39,6 +55,13 @@ function respond($success, $message = '', $data = []) {
 function clean($value) {
     return htmlspecialchars(trim($value), ENT_QUOTES, 'UTF-8');
 }
+
+// Global exception catcher to always return JSON
+set_exception_handler(function ($e) {
+    http_response_code(500);
+    echo json_encode(['success' => false, 'message' => 'Server exception: ' . $e->getMessage()]);
+    exit;
+});
 
 // ── Route by Action ─────────────────────────────────────────
 $action = $_POST['action'] ?? $_GET['action'] ?? '';
@@ -76,6 +99,9 @@ switch ($action) {
 
         // Check if reg_no already exists
         $stmt = $conn->prepare('SELECT id FROM users WHERE reg_no = ?');
+        if (!$stmt) {
+            respond(false, 'Database query error (SELECT): ' . $conn->error);
+        }
         $stmt->bind_param('s', $reg_no);
         $stmt->execute();
         $stmt->store_result();
@@ -92,6 +118,10 @@ switch ($action) {
 
         // Insert user
         $stmt = $conn->prepare('INSERT INTO users (name, reg_no, password, branch, grp) VALUES (?, ?, ?, ?, ?)');
+        if (!$stmt) {
+            $conn->close();
+            respond(false, 'Database query error (INSERT): ' . $conn->error);
+        }
         $stmt->bind_param('sssss', $name, $reg_no, $hashed, $branch, $grp);
 
         if ($stmt->execute()) {
@@ -99,9 +129,10 @@ switch ($action) {
             $conn->close();
             respond(true, 'Account created successfully');
         } else {
+            $err = $stmt->error;
             $stmt->close();
             $conn->close();
-            respond(false, 'Registration failed. Please try again.');
+            respond(false, 'Registration failed: ' . $err);
         }
         break;
 
@@ -119,6 +150,10 @@ switch ($action) {
         $conn = getDB();
 
         $stmt = $conn->prepare('SELECT id, name, reg_no, password, branch, semester, grp FROM users WHERE reg_no = ?');
+        if (!$stmt) {
+            $conn->close();
+            respond(false, 'Database query error (SELECT): ' . $conn->error);
+        }
         $stmt->bind_param('s', $reg_no);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -140,9 +175,11 @@ switch ($action) {
 
         // Update last_login
         $updateStmt = $conn->prepare('UPDATE users SET last_login = NOW() WHERE id = ?');
-        $updateStmt->bind_param('i', $user['id']);
-        $updateStmt->execute();
-        $updateStmt->close();
+        if ($updateStmt) {
+            $updateStmt->bind_param('i', $user['id']);
+            $updateStmt->execute();
+            $updateStmt->close();
+        }
         $conn->close();
 
         // Set session

@@ -1,14 +1,14 @@
 -- ============================================================
---  daily_planner.sql — Database setup for My Daily Planner
+--  tat_sangam.sql — Database setup for My Daily Planner
 --  Run this file in phpMyAdmin or MySQL CLI to create the
 --  database, users table, and seed the default admin account.
 -- ============================================================
 
-CREATE DATABASE IF NOT EXISTS daily_planner
+CREATE DATABASE IF NOT EXISTS tat_sangam
     CHARACTER SET utf8mb4
     COLLATE utf8mb4_unicode_ci;
 
-USE daily_planner;
+USE tat_sangam;
 
 CREATE TABLE IF NOT EXISTS users (
     id          INT AUTO_INCREMENT PRIMARY KEY,
