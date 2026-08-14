@@ -1,4 +1,4 @@
-# 📅 TAT SANGAM
+# TAT SANGAM
 
 A student daily planner & academic portal web app — timetable, to-do list, quick links, and live clock with PHP & MySQL authentication.
 

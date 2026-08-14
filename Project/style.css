@@ -222,7 +222,7 @@ a { color: var(--primary); font-weight: 700; }
 }
 
 /* Color-blocked icon chips per section */
-.card-header i.fa-calendar-alt,
+.card-header i.fa-table-list,
 .card-header i.fa-tasks,
 .card-header i.fa-link {
   color: var(--ink);
@@ -232,7 +232,7 @@ a { color: var(--primary); font-weight: 700; }
   box-shadow: var(--sh-sm);
   font-size: 0.85rem;
 }
-.card-header i.fa-calendar-alt { background: var(--blue); }
+.card-header i.fa-table-list { background: var(--blue); }
 .card-header i.fa-tasks { background: var(--pink); }
 .card-header i.fa-link { background: var(--green); }
 

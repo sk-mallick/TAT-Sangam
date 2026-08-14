@@ -417,7 +417,7 @@ function renderTodos() {
         content.innerHTML = `
             <div class="todo-text-wrap">
                 <strong>${escapeHtml(todo.title)}</strong><br>
-                <small>🗓️ ${escapeHtml(todo.deadline) || "No date"}   ${stars}</small>
+                <small>📌 ${escapeHtml(todo.deadline) || "No date"}   ${stars}</small>
             </div>
         `;
 
@@ -777,7 +777,7 @@ function renderTimetable(day) {
     if (todaySchedule.length === 0) {
         container.innerHTML = `
             <div class="text-center text-muted p-4">
-                <i class="fas fa-calendar-alt fa-2x mb-3"></i>
+                <i class="fas fa-table-list fa-2x mb-3"></i>
                 <p>No classes scheduled for ${escapeHtml(day)}</p>
             </div>
         `;
@@ -877,13 +877,13 @@ function switchTimetableView(view) {
     // Update Today button text
     const todayBtn = document.getElementById('todayViewBtn');
     if (selectedDate.toDateString() === new Date().toDateString()) {
-        todayBtn.innerHTML = '<i class="fas fa-calendar-day"></i> Today';
+        todayBtn.innerHTML = '<i class="fas fa-sun"></i> Today';
     } else {
         const dateStr = selectedDate.toLocaleDateString('en-US', {
             day: 'numeric',
             month: 'short'
         });
-        todayBtn.innerHTML = `<i class="fas fa-calendar-day"></i> ${dateStr}`;
+        todayBtn.innerHTML = `<i class="fas fa-sun"></i> ${dateStr}`;
     }
 
     if (view === 'week') {
