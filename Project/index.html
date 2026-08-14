@@ -32,37 +32,41 @@
 	<div id="appContent">
 		<!-- Header -->
 		<header class="app-header">
+			<!-- The visible brand is hidden on phones, so keep one page-level heading
+			     here that is always present for screen readers and SEO. -->
+			<h1 class="visually-hidden">TAT SANGAM</h1>
 			<div class="container-fluid">
 				<div class="row align-items-center">
 					<!-- Desktop View -->
 					<div class="col-auto d-none d-sm-block">
-						<h1 class="app-title mb-0">
+						<div class="app-title mb-0" aria-hidden="true">
 							<i class="fas fa-graduation-cap me-2"></i>
 							TAT SANGAM
-						</h1>
+						</div>
 					</div>
 					<div class="col d-none d-sm-block">
 						<div class="d-flex align-items-center justify-content-end gap-4">
-							<span id="userDisplay" class="text-white d-flex align-items-center">
+							<div id="userDisplay" class="text-white d-flex align-items-center">
 								<div class="user-avatar me-2 position-relative">
 									<i class="fas fa-user-circle"></i>
 									<span class="user-status"></span>
 								</div>
 								<div class="user-info">
 									<div class="user-name fw-bold text-truncate"></div>
-									<div class="user-details small opacity-75">
+									<div class="user-details small opacity-75 text-truncate">
 										<span class="user-reg me-2"></span>
-										<span class="user-branch"></span>
+										<span class="user-branch me-2"></span>
+										<span class="user-group"></span>
 									</div>
 								</div>
-							</span>
+							</div>
 							<div class="header-actions d-flex align-items-center gap-2">
 								<button id="themeToggleBtn" class="btn btn-icon theme-toggle"
 									data-tooltip="Toggle dark mode" aria-label="Toggle dark mode">
 									<i class="fas fa-moon"></i>
 								</button>
 								<div class="vr bg-white opacity-25"></div>
-								<button id="logoutBtn" class="btn btn-outline-light" onclick="handleLogout(event)">
+								<button id="logoutBtn" class="btn btn-outline-light">
 									<i class="fas fa-sign-out-alt me-2"></i>
 									<span>Logout</span>
 								</button>
@@ -97,7 +101,8 @@
 								<button id="themeToggleBtnMobile" class="btn btn-icon theme-toggle"
 									data-tooltip="Toggle dark mode" aria-label="Toggle dark mode"><i
 										class="fas fa-moon"></i></button>
-								<button id="logoutBtnMobile" class="btn btn-icon" onclick="handleLogout(event)">
+								<button id="logoutBtnMobile" class="btn btn-icon" data-tooltip="Logout"
+									aria-label="Logout">
 									<i class="fas fa-sign-out-alt"></i>
 								</button>
 							</div>

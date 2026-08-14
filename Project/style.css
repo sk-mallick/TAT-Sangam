@@ -134,7 +134,10 @@ a { color: var(--primary); font-weight: 700; }
   border: 2px solid var(--ink);
 }
 
-.user-info { line-height: 1.2; }
+/* min-width:0 lets the flex item shrink, and a max-width gives .user-name's
+   .text-truncate something to truncate against — without these a long name
+   just grows and shoves the rest of the header aside. */
+.user-info { line-height: 1.2; min-width: 0; max-width: 240px; }
 .user-name { font-size: 0.95rem; font-weight: 800; color: #fff; }
 .user-details { font-size: 0.78rem; color: rgba(255, 255, 255, 0.85); font-weight: 600; }
 
@@ -722,6 +725,13 @@ a { color: var(--primary); font-weight: 700; }
 [data-tooltip].btn-group > *:first-child::before { right: auto; left: 12px; }
 [data-tooltip].btn-group > *:last-child::after { left: auto; right: 0; }
 [data-tooltip].btn-group > *:last-child::before { left: auto; right: 12px; }
+
+/* Touch devices emulate :hover on tap, which leaves a tooltip stuck on screen
+   until you tap elsewhere. Suppress them where there is no real pointer. */
+@media (hover: none) {
+  [data-tooltip]:hover::after,
+  [data-tooltip]:hover::before { display: none; }
+}
 
 #daily-timetable [data-tooltip]:hover::after,
 .calendar-day[data-tooltip]:hover::after,

@@ -132,10 +132,12 @@ function loadUserData() {
             const userNameEl = userDisplay.querySelector('.user-name');
             const userRegEl = userDisplay.querySelector('.user-reg');
             const userBranchEl = userDisplay.querySelector('.user-branch');
+            const userGroupEl = userDisplay.querySelector('.user-group');
 
             if (userNameEl) userNameEl.textContent = userData.name;
             if (userRegEl) userRegEl.textContent = userData.regNo;
             if (userBranchEl) userBranchEl.textContent = userData.branch;
+            if (userGroupEl) userGroupEl.textContent = userData.group ? `G${userData.group}` : 'G1';
         }
 
         // Display username - Mobile
