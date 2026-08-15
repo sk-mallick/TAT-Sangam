@@ -558,6 +558,11 @@
             }
 
             function renderStudent(p) {
+                // AIS reports Section as "CST-B" while Branch is already "CST",
+                // so the branch is shown twice. Keep just the section itself.
+                p = Object.assign({}, p);
+                if (p.Section && p.Branch) { p.Section = stripBranch(p.Section, p.Branch); }
+
                 var name = p.Name || p.name || '—';
                 els.studentName.textContent = name;
                 els.avatar.textContent = initials(name);
@@ -583,6 +588,14 @@
 
             function fact(k, v) {
                 return '<div class="fact"><dt>' + esc(k) + '</dt><dd>' + esc(v) + '</dd></div>';
+            }
+
+            // "CST-B" + branch "CST" -> "B". Falls back to the original value if
+            // the prefix does not match or stripping would leave nothing.
+            function stripBranch(section, branch) {
+                var safe = String(branch).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                var out = String(section).replace(new RegExp('^' + safe + '[\\s\\-_/]*', 'i'), '').trim();
+                return out || String(section);
             }
 
             function initials(name) {
@@ -684,8 +697,8 @@
                     html += '<tr>' +
                         '<td class="cell-subject"><div class="sub-name">' + esc(r.subject) + '</div>' +
                         (r.code ? '<span class="sub-code">' + esc(r.code) + '</span>' : '') + '</td>' +
-                        '<td class="num" data-label="Held">' + r.held + '</td>' +
-                        '<td class="num" data-label="Attended">' + r.attended + '</td>' +
+                        '<td class="num" data-label="Held">' + pad2(r.held) + '</td>' +
+                        '<td class="num" data-label="Attended">' + pad2(r.attended) + '</td>' +
                         '<td class="num" data-label="Attendance"><span class="pill ' + cls + '">' +
                             pct.toFixed(1) + '%</span></td>' +
                         '<td class="advice" data-label="Action">' + advice + '</td>' +
@@ -698,6 +711,10 @@
                 return '<div class="stat' + (accent ? ' accent-' + accent : '') + '">' +
                     '<div class="k">' + k + '</div><div class="v">' + v + '</div></div>';
             }
+
+            // Two-digit counts (0 -> 00, 6 -> 06) so the columns line up.
+            // Values of 100+ are left untouched.
+            function pad2(n) { return String(n).length < 2 ? '0' + n : String(n); }
 
             function clampTarget() {
                 return Math.min(100, Math.max(1, parseInt(els.target.value, 10) || 75));

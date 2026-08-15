@@ -155,7 +155,14 @@ a { color: var(--primary); font-weight: 700; }
 .btn-icon:hover { transform: translate(-1px, -1px); box-shadow: var(--sh); background: var(--warning); color: var(--ink); }
 .btn-icon:active { transform: translate(2px, 2px); box-shadow: 0 0 0 var(--ink); }
 
-.vr { width: var(--bw); height: 30px; margin: 0 0.5rem; background: var(--ink); opacity: 1 !important; }
+/* Bootstrap gives .vr `align-self: stretch`. With an explicit height that does
+   not stretch — it pins the rule to the top of the flex line and ignores the
+   parent's align-items:center. Centre it explicitly on both axes. */
+.vr {
+  width: var(--bw); height: 30px; margin: 0 0.5rem;
+  background: var(--ink); opacity: 1 !important;
+  align-self: center; flex: 0 0 auto; min-height: 0;
+}
 
 #logoutBtn {
   background: var(--danger);
