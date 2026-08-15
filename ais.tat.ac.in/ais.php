@@ -57,6 +57,7 @@ if ($action === 'status') {
         'aisUser'      => $d['u'] ?? '',
         'profile'      => $d['profile']    ?? [],
         'attendance'   => $d['attendance'] ?? [],
+        'semesters'    => $d['semesters']  ?? [],   // the list AIS actually offers
         'usedSemester' => $d['semester']   ?? null,
         'fetchedAt'    => $d['fetchedAt']  ?? null,
     ]);
@@ -150,12 +151,20 @@ try {
     }
     $ais->close();
 
+    // The semester list is only discovered when the picker is submitted. If this
+    // fetch skipped that step, keep the list already known for this sign-in
+    // rather than dropping it and falling back to a guess.
+    if (empty($semesters) && $store && !empty($store['data']['semesters'])) {
+        $semesters = $store['data']['semesters'];
+    }
+
     $fetchedAt = date('c');
     $payload   = [
         'u'          => $user,
         'p'          => $pass,
         'profile'    => $profile,
         'attendance' => $attendance['rows'],
+        'semesters'  => $semesters,
         'semester'   => $usedSem,
         'fetchedAt'  => $fetchedAt,
     ];

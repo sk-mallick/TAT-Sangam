@@ -8,18 +8,32 @@ Open it at:
 
 ## Two ways to get your attendance
 
-### 1. This page (`index.html`) — log in with your AIS ID
+### 1. This page (`index.html`) — sign in once, stay signed in
 
     Browser -> ais.php (your backend) -> AIS login -> attendance page
             -> semester form -> parse -> JSON -> page
 
-Your AIS password is posted once to *your own* backend, used to log in, then
-discarded. It is **never** written to the database, a file, a log or the PHP
-session — there is deliberately no "remember me", which is why a different
-semester means entering it again.
+You sign in once and stay signed in until you press **Sign out** — reloading
+or closing the browser does not log you out. Semesters can be switched at any
+time without retyping anything.
 
-> On localhost this is fine. If you ever deploy this, the site **must** be
-> HTTPS, or the password crosses the network in clear text.
+**How the password is held.** Staying signed in requires keeping it, so:
+
+| | |
+|---|---|
+| Encryption | AES-256-GCM (authenticated) before it touches disk |
+| Key location | generated per sign-in, stored **only** in your browser cookie |
+| Server file | `_store/<token>.bin`, ciphertext only — undecryptable alone |
+| Cookie | HttpOnly, SameSite=Lax, 30 days, unreadable from JavaScript |
+| Sign out | deletes the file *and* expires the cookie |
+
+Neither half is enough on its own: the file has no key, the cookie points at
+nothing once the file is gone. `_store/` is also blocked over HTTP (403).
+
+> This is meaningfully safer than storing a plaintext password, but it is not
+> magic — someone with **both** your logged-in browser and the server file can
+> recover it. On localhost that is you. If you ever deploy this, the site
+> **must** be HTTPS, or the password crosses the network in clear text.
 
 ### 2. `tat-attendance.user.js` — no password at all
 
@@ -53,8 +67,9 @@ the profile parser walks each row in pairs.
 
 | File | Purpose |
 |---|---|
-| `index.html` | The page — login form, profile, attendance table, target maths |
-| `ais.php` | Endpoint. `POST action=fetch, ais_user, ais_pass, [semester]` |
+| `index.html` | The page — sign-in, student card, summary, attendance table |
+| `ais.php` | Endpoint. `POST action=login\|fetch\|status\|logout` |
+| `_store/` | Encrypted sign-in blobs. Blocked over HTTP; delete to force sign-out |
 | `ais_lib.php` | Connector + parsers. Pure library, safe to include from tests |
 | `tat-attendance.user.js` | In-browser panel (option 2 above) |
 | `_test-fixture.html` | Mock JSP page — parser picks the data table out of layout tables |
