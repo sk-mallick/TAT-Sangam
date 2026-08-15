@@ -23,7 +23,10 @@
             display: grid; grid-template-columns: minmax(0, 1fr) minmax(280px, 30%);
             gap: 1.1rem; align-items: start;
         }
-        @media (max-width: 992px) { .pf-layout { grid-template-columns: 1fr; } }
+        /* minmax(0, 1fr), not 1fr: grid items default to min-width:auto, so the
+           wide SGPA table would stretch the column past the screen edge. */
+        @media (max-width: 992px) { .pf-layout { grid-template-columns: minmax(0, 1fr); } }
+        .pf-layout > * { min-width: 0; }
 
         .section + .section { margin-top: 1rem; }
         .section-title {
@@ -123,19 +126,36 @@
            would shrink this column to its content — and a sticky child can only
            travel within its parent, so it would never move. Stretching the column
            to the row height gives it that room. */
-        .id-col { display: block; align-self: stretch; height: 100%; }
-        .id-sticky {
-            position: sticky; top: 1rem;
-            display: flex; flex-direction: column; gap: 0.8rem;
+        .id-col {
+            display: block; align-self: stretch; height: 100%;
+            position: relative;
+            padding-bottom: var(--connect-h, 104px);   /* room for the panel below */
         }
-        .id-stage { perspective: 1100px; display: flex; justify-content: center; flex: 1 1 auto; }
+        /* Deliberately NOT height:100vh. That made this column taller than the
+           left one, so it drove the page height and the panel ended up far below
+           the left column's last card. Instead the stack shrink-wraps and the
+           sticky offset places the card mid-screen:
+              top = 50vh − (ribbon + crimp + half the card)
+           clamped so it never pins above the viewport on short screens. */
+        .id-sticky {
+            position: sticky;
+            top: max(0.6rem, calc(50vh - 376px));
+            display: flex; flex-direction: column; gap: 0.6rem;
+        }
+        .id-stage {
+            perspective: 1100px; flex: 0 0 auto;
+            display: flex; justify-content: center;
+        }
         .id-hanger {
             --lanyard: #e53935;                    /* ribbon colour — one value drives strap + crimp */
+            --overhang: 320px;                     /* how far the strap rises above its box */
             width: 100%; max-width: 300px;
             display: flex; flex-direction: column; align-items: center;
-            transform-origin: 50% -270px;          /* pivots at the top of the strap */
+            transform-origin: 50% calc(-1 * var(--overhang));   /* pivots where the strap starts */
             animation: sway 7s ease-in-out infinite;
         }
+        /* No longer needed: the sticky offset does the centring now. */
+        .id-tail { display: none; }
         @keyframes sway {
             0%, 100% { transform: rotate(-1.4deg); }
             50%      { transform: rotate(1.4deg); }
@@ -143,14 +163,25 @@
 
         /* ── the ribbon ── */
         /* Change --lanyard to any colour (e.g. #e53935 for red). */
+        /* The ribbon takes whatever height is left above the card, so it is as
+           long as the screen needs — a fixed height cannot reach a centred card
+           on a tall display. The negative margin keeps it tucked behind the
+           header at the top of the page. */
+        /* Fixed layout height; the strap itself paints --overhang further up, so
+           the visible ribbon is height + overhang without costing any layout. */
         .lanyard {
-            width: 58px; height: 340px; margin-top: -270px;   /* runs up behind the header */
+            flex: 0 0 auto; height: 150px;
+            width: 58px;
             position: relative; z-index: 1;
         }
         /* All shading is derived from --lanyard itself, so the ribbon reads as
            red throughout — no black overlays. */
+        /* Painted from --overhang above the box down to its bottom. Because it is
+           absolutely positioned this costs no layout height, so the card stays
+           centred while the ribbon still reaches up past the header. */
         .lanyard .strap {
-            position: absolute; inset: 0;
+            position: absolute;
+            top: calc(-1 * var(--overhang)); left: 0; right: 0; bottom: 0;
             background:
                 repeating-linear-gradient(0deg,
                     rgba(255,255,255,0.10) 0 2px, transparent 2px 5px),
@@ -187,8 +218,11 @@
            no seam at either join. */
         /* Horizontal crimp bar: wider than the strap, shallow, and shaded only
            with tints of --lanyard so it stays red. No black shadow. */
+        /* flex:0 0 auto is required — as a default flex item the crimp shrinks
+           whenever vertical space tightens, visibly changing size at the bottom
+           of the page. Same for the hint below the card. */
         .crimp {
-            position: relative; z-index: 3;
+            position: relative; z-index: 3; flex: 0 0 auto;
             width: 92px; height: 24px;
             margin-top: -6px; margin-bottom: -10px;
             border: 2px solid color-mix(in srgb, var(--lanyard) 60%, #000);
@@ -210,7 +244,7 @@
         .crimp::after  { bottom: 2px; background: color-mix(in srgb, var(--lanyard) 70%, #000); }
 
         .idcard {
-            width: 100%; position: relative; z-index: 2; background: var(--surface);
+            width: 100%; flex: 0 0 auto; position: relative; z-index: 2; background: var(--surface);
             border: var(--bw-thick) solid var(--ink); border-radius: 12px;
             box-shadow: var(--sh-lg); overflow: hidden; position: relative;
             transition: transform 0.18s ease-out;
@@ -273,10 +307,34 @@
         .barcode { flex: 1 1 auto; height: 24px; display: flex; gap: 1px; align-items: stretch; }
         .barcode i { display: block; background: var(--ink); }
         .id-valid { font-size: 0.48rem; font-weight: 900; color: var(--muted); text-transform: uppercase; white-space: nowrap; }
-        .id-hint { margin-top: 0.5rem; text-align: center; font-size: 0.56rem; font-weight: 900; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; }
+        .id-hint { flex: 0 0 auto; margin-top: 0.5rem; text-align: center; font-size: 0.56rem; font-weight: 900; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; }
 
-        /* connect controls live with the card, not between the content sections */
-        .connect-box { flex: 0 0 auto; }
+        /* Anchored to the bottom of the COLUMN, not the viewport. The column
+           stretches to the row height, so this lines up exactly with the bottom
+           of the last card in the left column — and because it sits at the page
+           bottom it is naturally off-screen until you scroll there. */
+        .connect-box { position: absolute; left: 0; right: 0; bottom: 0; z-index: 6; }
+
+        .connect-body { padding: 0.55rem 0.6rem !important; }
+        .connect-head {
+            display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.4rem;
+        }
+        .connect-head i { color: var(--primary); font-size: 0.72rem; }
+        .connect-title {
+            font-size: 0.62rem; font-weight: 900; text-transform: uppercase;
+            letter-spacing: 0.5px; color: var(--muted);
+        }
+        .connect-hint {
+            margin-left: auto; font-size: 0.62rem; font-weight: 800;
+            color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+        }
+        .connect-box .btns { display: flex; gap: 0.4rem; align-items: center; }
+        .connect-box .btns .btn-tool { flex: 1 1 0; padding: 0.3rem 0.4rem; font-size: 0.62rem; }
+        .connect-status {
+            font-size: 0.54rem; font-weight: 900; color: var(--muted);
+            text-transform: uppercase; letter-spacing: 0.3px;
+            margin-top: 0.35rem; text-align: center;
+        }
         .connect-box .btns { display: grid; grid-template-columns: 1fr 1fr; gap: 0.4rem; margin-top: 0.6rem; }
         .connect-box .btns .full { grid-column: 1 / -1; }
         .connect-status { font-size: 0.56rem; font-weight: 900; color: var(--muted); text-transform: uppercase; letter-spacing: 0.3px; margin-top: 0.45rem; text-align: center; }
@@ -287,9 +345,19 @@
             .idcard { transition: none; }
         }
         @media (max-width: 992px) {
-            .id-sticky { position: static; }
-            .lanyard { height: 130px; margin-top: 0; }
-            .id-hanger { transform-origin: 50% 0%; }
+            .id-col { padding-bottom: 0; }
+            .id-sticky { position: static; height: auto; padding: 0; }
+            .id-stage { flex: 0 0 auto; padding-bottom: 0; }
+            /* No overhang when stacked: the strap would paint over the content
+               sitting above the card. */
+            .id-hanger { height: auto; --overhang: 0px; }
+            .lanyard { flex: 0 0 auto; height: 130px; margin-top: 0; }
+            .id-tail { display: none; }
+            /* stacked layout: the panel simply follows the card, always visible */
+            .connect-box {
+                position: static; opacity: 1; transform: none;
+                pointer-events: auto; transition: none;
+            }
         }
 
         /* ══════════ modal + toast ══════════ */
@@ -383,28 +451,29 @@
                         </div>
 
                         <div class="id-hint" id="idHint">Not verified</div>
+                        <div class="id-tail"></div>
                     </div>
                 </div>
 
                 <!-- connect controls, kept beside the card -->
-                <div class="connect-box">
-                    <div class="panel">
-                        <div class="panel-body" style="padding:0.75rem;">
-                            <div class="section-title" style="margin-bottom:0.4rem;">
-                                <i class="fas fa-link"></i> Trident AIS
-                            </div>
-                            <div id="connectHint" style="font-size:0.7rem;font-weight:700;color:var(--muted);">
-                                Connect to load your full profile and career record.
-                            </div>
-                            <div class="btns">
-                                <button class="btn-tool primary full" id="connectBtn">
-                                    <i class="fas fa-plug"></i> Connect AIS
-                                </button>
-                                <button class="btn-tool d-none" id="refreshBtn"><i class="fas fa-rotate"></i> Refresh</button>
-                                <button class="btn-tool danger d-none" id="disconnectBtn"><i class="fas fa-link-slash"></i> Disconnect</button>
-                            </div>
-                            <div class="connect-status" id="syncedAt"></div>
+              </div>
+
+              <div class="connect-box">
+                <div class="panel">
+                    <div class="panel-body connect-body">
+                        <div class="connect-head">
+                            <i class="fas fa-link"></i>
+                            <span class="connect-title">Trident AIS</span>
+                            <span class="connect-hint" id="connectHint">Not connected</span>
                         </div>
+                        <div class="btns">
+                            <button class="btn-tool primary" id="connectBtn">
+                                <i class="fas fa-plug"></i> Connect AIS
+                            </button>
+                            <button class="btn-tool d-none" id="refreshBtn"><i class="fas fa-rotate"></i> Refresh</button>
+                            <button class="btn-tool danger d-none" id="disconnectBtn"><i class="fas fa-link-slash"></i> Disconnect</button>
+                        </div>
+                        <div class="connect-status" id="syncedAt"></div>
                     </div>
                 </div>
               </div>
@@ -644,7 +713,8 @@
                 if (section && branch) { section = stripBranch(section, branch); }
 
                 el('idName').textContent = name;
-                el('strapText').textContent = 'TRIDENT ACADEMY OF TECHNOLOGY · '.repeat(4);
+                // repeated enough to fill a tall ribbon; the strap clips the rest
+                el('strapText').textContent = 'TRIDENT ACADEMY OF TECHNOLOGY · '.repeat(10);
 
                 var photoBox = el('idPhoto');
                 photoBox.innerHTML = photo
@@ -671,6 +741,32 @@
                 el('idHint').style.color = verified ? 'var(--success)' : 'var(--muted)';
 
                 buildBarcode(p['Registration number'] || lu['Registration number'] || 'TATSANGAM');
+            }
+
+            /**
+             * The lanyard colour reports hostel status at a glance, the way a real
+             * campus uses different lanyards: deep green for a hostel resident,
+             * red otherwise. Drives the strap and the crimp together, since both
+             * derive their shading from --lanyard.
+             */
+            var LANYARD_HOSTEL = '#0f7a3d';      // deep green — availing
+            var LANYARD_DEFAULT = '#e53935';     // red — not availing / unknown
+
+            function applyLanyardColour(fac) {
+                var hanger = document.querySelector('.id-hanger');
+                if (!hanger) { return; }
+
+                var value = null;
+                Object.keys(fac || {}).forEach(function (k) {
+                    if (value === null && /hostel|accommodat|room/i.test(k)) {
+                        value = String(fac[k]).trim();
+                    }
+                });
+                var availing = value !== null &&
+                    /^(y|yes|true|1|availing|allotted|allocated)$/i.test(value);
+
+                hanger.style.setProperty('--lanyard', availing ? LANYARD_HOSTEL : LANYARD_DEFAULT);
+                hanger.dataset.hostel = availing ? 'yes' : 'no';
             }
 
             // Bar widths derived from the registration number: same student, same barcode.
@@ -720,7 +816,7 @@
                 el('connectBtn').classList.remove('d-none');
                 el('refreshBtn').classList.add('d-none');
                 el('disconnectBtn').classList.add('d-none');
-                el('connectHint').textContent = 'Connect to load your full profile and career record.';
+                el('connectHint').textContent = 'Not connected';
                 el('syncedAt').textContent = '';
                 el('aisPass').value = '';
             }
