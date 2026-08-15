@@ -115,73 +115,63 @@
             font-size: 0.56rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.4px; white-space: nowrap;
         }
         .career-table td { padding: 0.45rem 0.6rem; border-top: var(--bw) solid var(--ink); font-size: 0.82rem; font-weight: 800; color: var(--text); text-align: center; }
-        .career-table tbody tr:nth-child(even) { background: var(--surface-2); }
-        .table-scroll { overflow-x: auto; }
-
-        /* ══════════ RIGHT 30% — ID card ══════════ */
-        /* The column itself must NOT be sticky: it is taller than the viewport,
-           so there would be nothing for it to stick against. The inner wrapper
-           is the sticky element, and that is what follows the scroll. */
-        /* align-self:stretch is essential. The layout sets align-items:start, which
-           would shrink this column to its content — and a sticky child can only
-           travel within its parent, so it would never move. Stretching the column
-           to the row height gives it that room. */
+        .career-table tbody tr:nth-child(even) { background: var(--surface-2); }        /* ══════════ RIGHT 30% — ID card ══════════ */
         .id-col {
-            display: block; align-self: stretch; height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-self: stretch;
+            height: 100%;
             position: relative;
-            padding-bottom: var(--connect-h, 104px);   /* room for the panel below */
         }
-        /* Deliberately NOT height:100vh. That made this column taller than the
-           left one, so it drove the page height and the panel ended up far below
-           the left column's last card. Instead the stack shrink-wraps and the
-           sticky offset places the card mid-screen:
-              top = 50vh − (ribbon + crimp + half the card)
-           clamped so it never pins above the viewport on short screens. */
+        /* Sticky offset centers the ID card stack vertically in the viewport:
+           top = 50vh - half total stack height, clamped to safe margins */
         .id-sticky {
             position: sticky;
-            top: max(0.6rem, calc(50vh - 376px));
-            display: flex; flex-direction: column; gap: 0.6rem;
+            top: max(1rem, calc(50vh - 240px));
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.6rem;
+            width: 100%;
+            max-width: 275px;
+            margin: 0 auto;
         }
         .id-stage {
-            perspective: 1100px; flex: 0 0 auto;
-            display: flex; justify-content: center;
+            perspective: 1100px;
+            flex: 0 0 auto;
+            width: 100%;
+            display: flex;
+            justify-content: center;
         }
         .id-hanger {
-            --lanyard: #e53935;                    /* ribbon colour — one value drives strap + crimp */
-            --overhang: 320px;                     /* how far the strap rises above its box */
-            width: 100%; max-width: 300px;
-            display: flex; flex-direction: column; align-items: center;
-            transform-origin: 50% calc(-1 * var(--overhang));   /* pivots where the strap starts */
+            --lanyard: #e53935;                    /* ribbon colour — drives strap + crimp */
+            --overhang: 300px;                     /* how far the strap rises above its box */
+            width: 100%;
+            max-width: 265px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transform-origin: 50% calc(-1 * var(--overhang));
             animation: sway 7s ease-in-out infinite;
         }
-        /* No longer needed: the sticky offset does the centring now. */
         .id-tail { display: none; }
         @keyframes sway {
-            0%, 100% { transform: rotate(-1.4deg); }
-            50%      { transform: rotate(1.4deg); }
+            0%, 100% { transform: rotate(-1.3deg); }
+            50%      { transform: rotate(1.3deg); }
         }
 
         /* ── the ribbon ── */
-        /* Change --lanyard to any colour (e.g. #e53935 for red). */
-        /* The ribbon takes whatever height is left above the card, so it is as
-           long as the screen needs — a fixed height cannot reach a centred card
-           on a tall display. The negative margin keeps it tucked behind the
-           header at the top of the page. */
-        /* Fixed layout height; the strap itself paints --overhang further up, so
-           the visible ribbon is height + overhang without costing any layout. */
         .lanyard {
-            flex: 0 0 auto; height: 150px;
-            width: 58px;
-            position: relative; z-index: 1;
+            flex: 0 0 auto;
+            height: 48px;
+            width: 50px;
+            position: relative;
+            z-index: 1;
         }
-        /* All shading is derived from --lanyard itself, so the ribbon reads as
-           red throughout — no black overlays. */
-        /* Painted from --overhang above the box down to its bottom. Because it is
-           absolutely positioned this costs no layout height, so the card stays
-           centred while the ribbon still reaches up past the header. */
         .lanyard .strap {
             position: absolute;
-            top: calc(-1 * var(--overhang)); left: 0; right: 0; bottom: 0;
+            top: calc(-1 * var(--overhang));
+            left: 0; right: 0; bottom: 0;
             background:
                 repeating-linear-gradient(0deg,
                     rgba(255,255,255,0.10) 0 2px, transparent 2px 5px),
@@ -194,18 +184,26 @@
             border-left: 2px solid color-mix(in srgb, var(--lanyard) 62%, #000);
             border-right: 2px solid color-mix(in srgb, var(--lanyard) 62%, #000);
             overflow: hidden;
-            display: flex; align-items: center; justify-content: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         .strap-text {
-            writing-mode: vertical-rl; text-orientation: mixed;
-            font-size: 0.72rem; font-weight: 900; letter-spacing: 3.5px;
-            color: #fff; opacity: 0.92; white-space: nowrap;
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            font-size: 0.62rem;
+            font-weight: 900;
+            letter-spacing: 2px;
+            color: #fff;
+            opacity: 0.92;
+            white-space: nowrap;
             text-shadow: 0 1px 0 rgba(0,0,0,0.35);
-            transform: rotate(180deg);            /* reads bottom-to-top, like the real thing */
+            transform: rotate(180deg);
         }
-        /* the sewn fold where the strap meets the crimp */
         .lanyard::after {
-            content: ''; position: absolute; left: -3px; right: -3px; bottom: 0; height: 12px;
+            content: '';
+            position: absolute;
+            left: -3px; right: -3px; bottom: 0; height: 10px;
             background: linear-gradient(180deg,
                 color-mix(in srgb, var(--lanyard) 82%, #000),
                 color-mix(in srgb, var(--lanyard) 92%, #fff));
@@ -213,18 +211,15 @@
             border-radius: 3px;
         }
 
-        /* Woven crimp: the strap folds into a ridged clamp that grips the card
-           directly. It overlaps the strap above and the card below, so there is
-           no seam at either join. */
-        /* Horizontal crimp bar: wider than the strap, shallow, and shaded only
-           with tints of --lanyard so it stays red. No black shadow. */
-        /* flex:0 0 auto is required — as a default flex item the crimp shrinks
-           whenever vertical space tightens, visibly changing size at the bottom
-           of the page. Same for the hint below the card. */
+        /* Woven crimp */
         .crimp {
-            position: relative; z-index: 3; flex: 0 0 auto;
-            width: 92px; height: 24px;
-            margin-top: -6px; margin-bottom: -10px;
+            position: relative;
+            z-index: 3;
+            flex: 0 0 auto;
+            width: 80px;
+            height: 18px;
+            margin-top: -4px;
+            margin-bottom: -7px;
             border: 2px solid color-mix(in srgb, var(--lanyard) 60%, #000);
             border-radius: 4px;
             background:
@@ -235,27 +230,35 @@
                     var(--lanyard) 42%,
                     color-mix(in srgb, var(--lanyard) 80%, #000) 100%);
         }
-        /* pressed lips along the top and bottom of the clamp */
         .crimp::before, .crimp::after {
-            content: ''; position: absolute; left: 3px; right: 3px; height: 3px;
+            content: '';
+            position: absolute;
+            left: 3px; right: 3px; height: 2px;
             border-radius: 2px;
         }
-        .crimp::before { top: 2px;    background: rgba(255,255,255,0.30); }
+        .crimp::before { top: 2px; background: rgba(255,255,255,0.30); }
         .crimp::after  { bottom: 2px; background: color-mix(in srgb, var(--lanyard) 70%, #000); }
 
         .idcard {
-            width: 100%; flex: 0 0 auto; position: relative; z-index: 2; background: var(--surface);
-            border: var(--bw-thick) solid var(--ink); border-radius: 12px;
-            box-shadow: var(--sh-lg); overflow: hidden; position: relative;
+            width: 100%;
+            flex: 0 0 auto;
+            position: relative;
+            z-index: 2;
+            background: var(--surface);
+            border: var(--bw-thick) solid var(--ink);
+            border-radius: 10px;
+            box-shadow: var(--sh-lg);
+            overflow: hidden;
             transition: transform 0.18s ease-out;
             transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
             transform-style: preserve-3d;
         }
-        /* space at the card's top where the crimp grips it */
-        .card-grip { height: 14px; }
-        /* moving holographic sheen */
+        .card-grip { height: 10px; }
         .idcard::after {
-            content: ''; position: absolute; inset: 0; pointer-events: none;
+            content: '';
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
             background: linear-gradient(115deg, transparent 30%,
                 rgba(255,255,255,0.45) 45%, rgba(255,255,255,0.10) 55%, transparent 70%);
             transform: translateX(-120%);
@@ -267,77 +270,150 @@
         }
 
         .id-head {
-            background: var(--primary); color: var(--primary-ink);
-            border-top: var(--bw) solid var(--ink); border-bottom: var(--bw) solid var(--ink);
-            padding: 0.45rem 0.6rem; display: flex; align-items: center; gap: 0.45rem; margin-top: 0.35rem;
+            background: var(--primary);
+            color: var(--primary-ink);
+            border-top: var(--bw) solid var(--ink);
+            border-bottom: var(--bw) solid var(--ink);
+            padding: 0.35rem 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            margin-top: 0.2rem;
         }
         .id-head .crest {
-            width: 26px; height: 26px; flex: 0 0 26px; border-radius: 50%;
-            background: var(--warning); color: var(--ink); border: var(--bw) solid var(--ink);
-            display: flex; align-items: center; justify-content: center; font-size: 0.8rem;
+            width: 22px;
+            height: 22px;
+            flex: 0 0 22px;
+            border-radius: 50%;
+            background: var(--warning);
+            color: var(--ink);
+            border: var(--bw) solid var(--ink);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.72rem;
         }
-        .id-head .t1 { font-size: 0.7rem; font-weight: 900; letter-spacing: 0.5px; line-height: 1.1; }
-        .id-head .t2 { font-size: 0.48rem; font-weight: 700; opacity: 0.9; letter-spacing: 0.4px; }
+        .id-head .t1 { font-size: 0.64rem; font-weight: 900; letter-spacing: 0.4px; line-height: 1.1; }
+        .id-head .t2 { font-size: 0.44rem; font-weight: 700; opacity: 0.9; letter-spacing: 0.3px; }
 
-        .id-body { padding: 0.7rem 0.7rem 0.6rem; text-align: center; }
+        .id-body { padding: 0.5rem 0.6rem 0.45rem; text-align: center; }
         .id-photo {
-            width: 100px; height: 120px; margin: 0 auto 0.45rem;
-            border: var(--bw) solid var(--ink); border-radius: 4px;
-            background: var(--surface-2); overflow: hidden;
-            display: flex; align-items: center; justify-content: center; box-shadow: var(--sh-sm);
+            width: 78px;
+            height: 94px;
+            margin: 0 auto 0.35rem;
+            border: var(--bw) solid var(--ink);
+            border-radius: 4px;
+            background: var(--surface-2);
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--sh-sm);
         }
         .id-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
-        .id-photo .initials { font-size: 1.9rem; font-weight: 900; color: var(--muted); letter-spacing: 1px; }
+        .id-photo .initials { font-size: 1.6rem; font-weight: 900; color: var(--muted); letter-spacing: 1px; }
 
         .id-name {
-            font-size: 0.84rem; font-weight: 900; text-transform: uppercase;
-            letter-spacing: 0.3px; line-height: 1.2; color: var(--text); word-break: break-word;
+            font-size: 0.78rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            line-height: 1.15;
+            color: var(--text);
+            word-break: break-word;
         }
         .id-role {
-            display: inline-block; margin-top: 0.22rem; padding: 0.05rem 0.5rem;
-            border: var(--bw) solid var(--ink); border-radius: 999px; background: var(--warning-soft);
-            font-size: 0.53rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.5px; color: var(--ink);
+            display: inline-block;
+            margin-top: 0.18rem;
+            padding: 0.04rem 0.45rem;
+            border: var(--bw) solid var(--ink);
+            border-radius: 999px;
+            background: var(--warning-soft);
+            font-size: 0.52rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--ink);
         }
-        .id-rows { margin-top: 0.55rem; text-align: left; display: grid; gap: 0.26rem; }
-        .id-row { display: flex; justify-content: space-between; gap: 0.5rem; font-size: 0.6rem; }
+        .id-rows { margin-top: 0.4rem; text-align: left; display: grid; gap: 0.2rem; }
+        .id-row { display: flex; justify-content: space-between; gap: 0.4rem; font-size: 0.58rem; }
         .id-row .k { font-weight: 900; text-transform: uppercase; color: var(--muted); letter-spacing: 0.3px; }
         .id-row .v { font-weight: 900; color: var(--text); text-align: right; overflow-wrap: anywhere; }
 
-        .id-foot { margin-top: 0.55rem; border-top: var(--bw) solid var(--ink); padding-top: 0.4rem; display: flex; align-items: center; gap: 0.5rem; }
-        .barcode { flex: 1 1 auto; height: 24px; display: flex; gap: 1px; align-items: stretch; }
-        .barcode i { display: block; background: var(--ink); }
-        .id-valid { font-size: 0.48rem; font-weight: 900; color: var(--muted); text-transform: uppercase; white-space: nowrap; }
-        .id-hint { flex: 0 0 auto; margin-top: 0.5rem; text-align: center; font-size: 0.56rem; font-weight: 900; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; }
-
-        /* Anchored to the bottom of the COLUMN, not the viewport. The column
-           stretches to the row height, so this lines up exactly with the bottom
-           of the last card in the left column — and because it sits at the page
-           bottom it is naturally off-screen until you scroll there. */
-        .connect-box { position: absolute; left: 0; right: 0; bottom: 0; z-index: 6; }
-
-        .connect-body { padding: 0.55rem 0.6rem !important; }
-        .connect-head {
-            display: flex; align-items: center; gap: 0.4rem; margin-bottom: 0.4rem;
+        .id-foot {
+            margin-top: 0.4rem;
+            border-top: var(--bw) solid var(--ink);
+            padding-top: 0.3rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
         }
-        .connect-head i { color: var(--primary); font-size: 0.72rem; }
+        .barcode { flex: 1 1 auto; height: 18px; display: flex; gap: 1px; align-items: stretch; }
+        .barcode i { display: block; background: var(--ink); }
+        .id-valid { font-size: 0.46rem; font-weight: 900; color: var(--muted); text-transform: uppercase; white-space: nowrap; }
+        .id-hint {
+            flex: 0 0 auto;
+            margin-top: 0.35rem;
+            text-align: center;
+            font-size: 0.54rem;
+            font-weight: 900;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+
+        /* ── Compact Connect widget docked right below ID card ── */
+        .connect-box {
+            width: 100%;
+            max-width: 265px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 6;
+        }
+        .connect-body { padding: 0.45rem 0.55rem !important; }
+        .connect-head {
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            margin-bottom: 0.35rem;
+        }
+        .connect-head i { color: var(--primary); font-size: 0.68rem; }
         .connect-title {
-            font-size: 0.62rem; font-weight: 900; text-transform: uppercase;
-            letter-spacing: 0.5px; color: var(--muted);
+            font-size: 0.6rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            color: var(--muted);
         }
         .connect-hint {
-            margin-left: auto; font-size: 0.62rem; font-weight: 800;
-            color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+            margin-left: auto;
+            font-size: 0.58rem;
+            font-weight: 800;
+            color: var(--text);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
-        .connect-box .btns { display: flex; gap: 0.4rem; align-items: center; }
-        .connect-box .btns .btn-tool { flex: 1 1 0; padding: 0.3rem 0.4rem; font-size: 0.62rem; }
-        .connect-status {
-            font-size: 0.54rem; font-weight: 900; color: var(--muted);
-            text-transform: uppercase; letter-spacing: 0.3px;
-            margin-top: 0.35rem; text-align: center;
+        .connect-box .btns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.35rem;
+            margin-top: 0.35rem;
         }
-        .connect-box .btns { display: grid; grid-template-columns: 1fr 1fr; gap: 0.4rem; margin-top: 0.6rem; }
         .connect-box .btns .full { grid-column: 1 / -1; }
-        .connect-status { font-size: 0.56rem; font-weight: 900; color: var(--muted); text-transform: uppercase; letter-spacing: 0.3px; margin-top: 0.45rem; text-align: center; }
+        .connect-box .btns .btn-tool {
+            padding: 0.3rem 0.4rem;
+            font-size: 0.58rem;
+        }
+        .connect-status {
+            font-size: 0.52rem;
+            font-weight: 900;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            margin-top: 0.3rem;
+            text-align: center;
+        }
 
         @media (prefers-reduced-motion: reduce) {
             .id-hanger { animation: none; }
@@ -346,18 +422,11 @@
         }
         @media (max-width: 992px) {
             .id-col { padding-bottom: 0; }
-            .id-sticky { position: static; height: auto; padding: 0; }
-            .id-stage { flex: 0 0 auto; padding-bottom: 0; }
-            /* No overhang when stacked: the strap would paint over the content
-               sitting above the card. */
+            .id-sticky { position: static; height: auto; padding: 0; max-width: 270px; }
+            .id-stage { flex: 0 0 auto; }
             .id-hanger { height: auto; --overhang: 0px; }
-            .lanyard { flex: 0 0 auto; height: 130px; margin-top: 0; }
-            .id-tail { display: none; }
-            /* stacked layout: the panel simply follows the card, always visible */
-            .connect-box {
-                position: static; opacity: 1; transform: none;
-                pointer-events: auto; transition: none;
-            }
+            .lanyard { flex: 0 0 auto; height: 44px; }
+            .connect-box { position: static; max-width: 265px; margin-top: 0.6rem; }
         }
 
         /* ══════════ modal + toast ══════════ */
@@ -455,26 +524,25 @@
                     </div>
                 </div>
 
-                <!-- connect controls, kept beside the card -->
-              </div>
-
-              <div class="connect-box">
-                <div class="panel">
-                    <div class="panel-body connect-body">
-                        <div class="connect-head">
-                            <i class="fas fa-link"></i>
-                            <span class="connect-title">Trident AIS</span>
-                            <span class="connect-hint" id="connectHint">Not connected</span>
-                        </div>
-                        <div class="btns">
-                            <button class="btn-tool primary" id="connectBtn">
-                                <i class="fas fa-plug"></i> Connect AIS
-                            </button>
-                            <button class="btn-tool d-none" id="refreshBtn"><i class="fas fa-rotate"></i> Refresh</button>
-                            <button class="btn-tool danger d-none" id="disconnectBtn"><i class="fas fa-link-slash"></i> Disconnect</button>
-                        </div>
-                        <div class="connect-status" id="syncedAt"></div>
-                    </div>
+                <!-- connect controls, docked neatly right below the card in the sticky stack -->
+                <div class="connect-box">
+                  <div class="panel">
+                      <div class="panel-body connect-body">
+                          <div class="connect-head">
+                              <i class="fas fa-link"></i>
+                              <span class="connect-title">Trident AIS</span>
+                              <span class="connect-hint" id="connectHint">Not connected</span>
+                          </div>
+                          <div class="btns">
+                              <button class="btn-tool primary" id="connectBtn">
+                                  <i class="fas fa-plug"></i> Connect AIS
+                              </button>
+                              <button class="btn-tool d-none" id="refreshBtn"><i class="fas fa-rotate"></i> Refresh</button>
+                              <button class="btn-tool danger d-none" id="disconnectBtn"><i class="fas fa-link-slash"></i> Disconnect</button>
+                          </div>
+                          <div class="connect-status" id="syncedAt"></div>
+                      </div>
+                  </div>
                 </div>
               </div>
             </div>
