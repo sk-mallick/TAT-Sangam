@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<!--
+  Fixture reproducing the REAL AIS attendance page, with both traps present:
+   1. a layout wrapper table containing everything (menu, profile, data table)
+   2. each attendance row wrapped in its own <form> posting to
+      viewstudentattendance.jsp  -- invalid HTML, so the parser reparents the
+      <tr> under the <form>
+  Data matches semester 7 as displayed by AIS. Safe to delete.
+-->
+<html><head><title>Attendance Details</title></head>
+<body>
+
+<!-- outer page wrapper (TABLE #3 equivalent) -->
+<table border="0">
+ <tr>
+  <td>
+    <table><tr><td>Career Details Semester Results Internal Theory Results Attendance Details</td></tr></table>
+  </td>
+  <td>
+    <!-- Student Information: two label/value pairs per row (TABLE #6) -->
+    <table>
+      <tr><td>Student Information</td></tr>
+      <tr><td>Registration number</td><td>2301289114</td><td>Session:</td><td>2026-2027</td></tr>
+      <tr><td>Name:</td><td>SUBHAM KUMAR MALLICK</td><td>Discipline/Course:</td><td>B.TECH.</td></tr>
+      <tr><td>Semester:</td><td>7</td><td>Class Roll Number:</td><td>38</td></tr>
+      <tr><td>Branch:</td><td>CST</td><td>Lab-Group:</td><td>2</td></tr>
+      <tr><td>Section:</td><td>CST-B</td><td>Current Year:</td><td>4</td></tr>
+      <tr><td>Select Semester</td><td>--- 1 2 3 4 5 6 7</td></tr>
+    </table>
+
+    <!-- the real attendance table (TABLE #8), rows wrapped in <form> -->
+    <table border="1">
+      <tr>
+        <th>Slno.</th><th>Subject Code</th><th>Subject Name</th>
+        <th>Classes Held</th><th>Classes Attended</th><th>Percentage</th>
+      </tr>
+      <form action="viewstudentattendance.jsp" method="post"><tr><td>1</td><td>DSOE4001</td><td>Data Science and Analytics</td><td>0</td><td>0</td><td>0.0%</td></tr></form>
+      <form action="viewstudentattendance.jsp" method="post"><tr><td>2</td><td>CSPC2006</td><td>Design and Analysis of Algorithms</td><td>11</td><td>6</td><td>54.55%</td></tr></form>
+      <form action="viewstudentattendance.jsp" method="post"><tr><td>3</td><td>PCAC4004</td><td>IoT Technologies and Applications</td><td>4</td><td>4</td><td>100.0%</td></tr></form>
+      <form action="viewstudentattendance.jsp" method="post"><tr><td>4</td><td>CSPC2003</td><td>Object Oriented Programming</td><td>10</td><td>7</td><td>70.0%</td></tr></form>
+      <form action="viewstudentattendance.jsp" method="post"><tr><td>5</td><td>TRIP4015</td><td>Pre Placement Training-SOFTSKILL</td><td>2</td><td>1</td><td>50.0%</td></tr></form>
+      <form action="viewstudentattendance.jsp" method="post"><tr><td>6</td><td>TRIP5015</td><td>Pre Placement Training-TECHNICAL</td><td>6</td><td>6</td><td>100.0%</td></tr></form>
+      <form action="viewstudentattendance.jsp" method="post"><tr><td>7</td><td>PCS7J005</td><td>Software Project Management</td><td>9</td><td>4</td><td>44.44%</td></tr></form>
+    </table>
+  </td>
+ </tr>
+</table>
+
+<table><tr><td>Engine 20.1.1.19</td></tr><tr><td>Copyright &copy; 2005-2024 Trident All Rights Reserved.</td></tr></table>
+
+</body></html>

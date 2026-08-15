@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<!--
+  Local test fixture only — NOT part of the app and never uploaded anywhere.
+  Mimics the nested-table markup style of an old JSP portal so the parser's
+  table-scoring can be verified offline. Safe to delete.
+-->
+<html>
+<head><title>Attendance Details</title></head>
+<body>
+
+<!-- layout table 1: banner (must NOT be chosen) -->
+<table width="100%" bgcolor="#eeeeee">
+  <tr><td><img src="logo.gif"></td><td>Trident E-Governance</td></tr>
+  <tr><td colspan="2">Welcome, Student</td></tr>
+</table>
+
+<!-- layout table 2: nav menu (must NOT be chosen) -->
+<table border="0">
+  <tr><td><a href="/ais/studsuclogin.jsp">Home</a></td></tr>
+  <tr><td><a href="/ais/studportal/semesterresults.jsp">Semester Results</a></td></tr>
+  <tr><td><a href="/ais/logout.jsp">Logout</a></td></tr>
+</table>
+
+<!-- the real data table -->
+<table border="1" cellpadding="3">
+  <tr bgcolor="#cccccc">
+    <th>Sl. No.</th>
+    <th>Subject Code</th>
+    <th>Subject Name</th>
+    <th>Total Classes Held</th>
+    <th>Classes Attended</th>
+    <th>Attendance %</th>
+  </tr>
+  <tr><td>1</td><td>CS701</td><td>Operating Systems</td><td>31</td><td>23</td><td>74.19</td></tr>
+  <tr><td>2</td><td>CS703</td><td>Web Technology</td><td>34</td><td>29</td><td>85.29</td></tr>
+  <tr><td>3</td><td>CS705</td><td>Artificial Intelligence &amp; ML</td><td>32</td><td>27</td><td>84.37</td></tr>
+  <tr><td>4</td><td>CS707</td><td>Compiler Design</td><td>28</td><td>15</td><td>53.57</td></tr>
+  <tr><td>5</td><td>CS709</td><td>Project Work</td><td>0</td><td>0</td><td>0.00</td></tr>
+  <tr bgcolor="#dddddd"><td></td><td></td><td>Total</td><td>125</td><td>94</td><td>75.20</td></tr>
+</table>
+
+</body>
+</html>

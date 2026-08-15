@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AIS Attendance - TAT SANGAM</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css" />
+    <script>
+        (function () {
+            try {
+                var t = localStorage.getItem('theme');
+                if (!t) t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+                if (t === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+            } catch (e) { }
+        })();
+    </script>
+    <style>
+        .ais-wrap { max-width: 940px; margin: 0 auto; padding: 1.25rem 1rem 3rem; }
+        .ais-note {
+            border: var(--bw) solid var(--ink); border-left: 8px solid var(--warning);
+            background: var(--warning-soft); border-radius: var(--r-sm);
+            padding: 0.7rem 0.9rem; font-size: 0.82rem; font-weight: 700; color: var(--text);
+        }
+        .ais-note.err { border-left-color: var(--danger); background: var(--danger-soft); }
+        .ais-note.ok { border-left-color: var(--success); background: var(--success-soft); }
+        .stat-row { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1rem; }
+        .stat-box {
+            flex: 1 1 160px; background: var(--surface); border: var(--bw) solid var(--ink);
+            border-radius: var(--r-sm); box-shadow: var(--sh-sm); padding: 0.7rem 0.9rem;
+        }
+        .stat-box .k { font-size: 0.64rem; font-weight: 900; text-transform: uppercase; color: var(--muted); letter-spacing: 0.4px; }
+        .stat-box .v { font-size: 1.6rem; font-weight: 900; line-height: 1.15; color: var(--text); }
+        .ais-table { width: 100%; border-collapse: collapse; background: var(--surface);
+            border: var(--bw) solid var(--ink); border-radius: var(--r-sm); overflow: hidden; }
+        .ais-table th { background: var(--ink); color: var(--bg); text-align: left; padding: 0.55rem 0.7rem;
+            font-size: 0.64rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.4px; }
+        .ais-table td { padding: 0.55rem 0.7rem; border-top: var(--bw) solid var(--ink);
+            font-size: 0.85rem; font-weight: 600; color: var(--text); }
+        .ais-table td.num { text-align: right; font-variant-numeric: tabular-nums; font-weight: 800; }
+        .sub-name { font-weight: 800; }
+        .sub-code { display: block; font-size: 0.64rem; font-weight: 800; color: var(--muted); text-transform: uppercase; }
+        .pill { display: inline-block; padding: 0.05rem 0.5rem; border-radius: 999px;
+            border: var(--bw) solid var(--ink); font-size: 0.72rem; font-weight: 900; font-variant-numeric: tabular-nums; }
+        .pill.ok { background: var(--success-soft); } .pill.warn { background: var(--warning-soft); } .pill.bad { background: var(--danger-soft); }
+        .advice { font-size: 0.74rem; font-weight: 700; color: var(--muted); }
+        .advice b { color: var(--text); font-weight: 900; }
+        .prof-grid { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+        .prof-item { border: var(--bw) solid var(--ink); border-radius: 999px; background: var(--surface);
+            padding: 0.1rem 0.6rem; font-size: 0.74rem; font-weight: 700; color: var(--text); }
+        .prof-item b { font-weight: 900; text-transform: uppercase; font-size: 0.64rem; color: var(--muted); margin-right: 0.3rem; }
+        pre.struct { background: var(--surface); border: var(--bw) solid var(--ink); border-radius: var(--r-sm);
+            padding: 0.7rem; font-size: 0.72rem; overflow-x: auto; margin-top: 0.7rem; color: var(--text); }
+        .d-none { display: none !important; }
+    </style>
+</head>
+
+<body>
+    <header class="app-header">
+        <h1 class="visually-hidden">TAT SANGAM - AIS Attendance</h1>
+        <div class="container-fluid">
+            <div class="row align-items-center">
+                <div class="col-auto">
+                    <div class="app-title mb-0" aria-hidden="true">
+                        <i class="fas fa-graduation-cap me-2"></i> TAT SANGAM
+                    </div>
+                </div>
+                <div class="col text-end">
+                    <a href="../Project/index.html" class="btn btn-outline-light btn-sm">
+                        <i class="fas fa-arrow-left me-2"></i>Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="ais-wrap">
+
+        <!-- ── Credential form ─────────────────────────────── -->
+        <div class="card hover-card mb-3" id="loginCard">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span class="fw-bold text-primary d-flex align-items-center gap-2">
+                    <i class="fas fa-id-card"></i> Sign in to AIS
+                </span>
+            </div>
+            <div class="card-body">
+                <div class="ais-note mb-3">
+                    <i class="fas fa-shield-halved me-1"></i>
+                    You stay signed in until you press <b>Sign out</b>. To do that your password is
+                    kept <b>encrypted</b> on this machine, and the key that unlocks it lives only in
+                    your browser cookie &mdash; the stored file is useless on its own.
+                </div>
+
+                <form id="aisForm" novalidate>
+                    <div class="floating-input mb-3">
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-user"></i></span>
+                            <input type="text" class="form-control" id="aisUser" name="ais_user"
+                                autocomplete="username" required placeholder="Your AIS user ID">
+                        </div>
+                        <label for="aisUser">AIS User ID</label>
+                    </div>
+
+                    <div class="floating-input mb-3">
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                            <input type="password" class="form-control" id="aisPass" name="ais_pass"
+                                autocomplete="current-password" required placeholder="Your AIS password">
+                            <button class="btn btn-outline-secondary" type="button" id="togglePass"
+                                aria-label="Show password">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <label for="aisPass">AIS Password</label>
+                    </div>
+
+                    <div class="floating-input mb-3">
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-layer-group"></i></span>
+                            <select class="form-select" id="aisSem" name="semester">
+                                <option value="">Current semester (auto)</option>
+                                <option value="1">Semester 1</option>
+                                <option value="2">Semester 2</option>
+                                <option value="3">Semester 3</option>
+                                <option value="4">Semester 4</option>
+                                <option value="5">Semester 5</option>
+                                <option value="6">Semester 6</option>
+                                <option value="7">Semester 7</option>
+                                <option value="8">Semester 8</option>
+                            </select>
+                        </div>
+                        <label for="aisSem">Semester</label>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-lg w-100" id="fetchBtn">
+                        <i class="fas fa-download me-2"></i>Fetch My Attendance
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- ── Status ──────────────────────────────────────── -->
+        <div id="status" class="ais-note d-none mb-3"></div>
+
+        <!-- ── Results ─────────────────────────────────────── -->
+        <div class="card hover-card d-none" id="resultCard">
+            <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <span class="fw-bold text-primary d-flex align-items-center gap-2">
+                    <i class="fas fa-chart-simple"></i> Attendance
+                    <small id="fetchedAt" class="text-muted fw-normal"></small>
+                </span>
+                <div class="d-flex align-items-center gap-2">
+                    <label for="target" class="fw-bold" style="font-size:0.7rem;text-transform:uppercase;">Target %</label>
+                    <input type="number" id="target" class="form-control form-control-sm" min="1" max="100"
+                        value="75" style="width:76px;font-weight:800;">
+                    <button class="btn btn-sm btn-outline-secondary" id="againBtn" data-tooltip="Refresh from AIS"
+                        aria-label="Refresh from AIS">
+                        <i class="fas fa-rotate"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger" id="logoutBtn">
+                        <i class="fas fa-right-from-bracket me-1"></i>Sign out
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div id="profile" class="prof-grid mb-3"></div>
+                <div id="stats" class="stat-row"></div>
+                <div class="table-responsive"><div id="tableWrap"></div></div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        (function () {
+            'use strict';
+
+            var form = document.getElementById('aisForm');
+            var statusEl = document.getElementById('status');
+            var resultCard = document.getElementById('resultCard');
+            var loginCard = document.getElementById('loginCard');
+            var targetEl = document.getElementById('target');
+            var fetchBtn = document.getElementById('fetchBtn');
+            var rows = null;
+
+            document.getElementById('togglePass').addEventListener('click', function () {
+                var p = document.getElementById('aisPass');
+                var show = p.type === 'password';
+                p.type = show ? 'text' : 'password';
+                this.querySelector('i').className = show ? 'fas fa-eye-slash' : 'fas fa-eye';
+                this.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+            });
+
+            // Refresh re-reads AIS using the stored sign-in — no retyping.
+            document.getElementById('againBtn').addEventListener('click', function () {
+                var body = new FormData();
+                body.append('action', 'fetch');
+                body.append('semester', document.getElementById('aisSem').value);
+                send(body, 'Refreshing from AIS...');
+            });
+
+            document.getElementById('logoutBtn').addEventListener('click', function () {
+                var body = new FormData();
+                body.append('action', 'logout');
+                send(body, 'Signing out...');
+            });
+
+            targetEl.addEventListener('input', function () { if (rows) render(rows); });
+
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+                var body = new FormData();
+                body.append('action', 'login');
+                body.append('ais_user', document.getElementById('aisUser').value.trim());
+                body.append('ais_pass', document.getElementById('aisPass').value);
+                body.append('semester', document.getElementById('aisSem').value);
+                send(body, 'Signing in to AIS and reading your attendance...');
+            });
+
+            function send(body, busyMessage) {
+                var pass = document.getElementById('aisPass');
+
+                fetchBtn.disabled = true;
+                setStatus(busyMessage, null);
+
+                // ais.php sits next to this page, in the same folder.
+                return fetch('ais.php', { method: 'POST', body: body })
+                    .then(function (r) {
+                        return r.text().then(function (text) {
+                            try {
+                                return JSON.parse(text);
+                            } catch (e) {
+                                // Report what actually came back rather than a guess —
+                                // a 404 page and a PHP fatal look identical otherwise.
+                                throw new Error(
+                                    'Backend returned HTTP ' + r.status + ' (' + (r.statusText || 'no status') +
+                                    ') instead of JSON. First bytes: ' +
+                                    (text.trim().slice(0, 120) || '(empty response)')
+                                );
+                            }
+                        });
+                    })
+                    .then(function (data) {
+                        // Clear the password from the DOM as soon as the request is away.
+                        pass.value = '';
+
+                        if (data.loggedIn === false) { showSignedOut(); }
+
+                        if (!data.success) {
+                            setStatus(data.message || 'Failed.', 'err');
+                            // Anything the backend managed to read still helps.
+                            if (data.profile && Object.keys(data.profile).length) {
+                                showProfile(data.profile);
+                                document.getElementById('stats').innerHTML = '';
+                                document.getElementById('tableWrap').innerHTML = '';
+                                showSignedIn();
+                            }
+                            showStructure(data.tables || [], data.forms || []);
+                            return;
+                        }
+
+                        if (data.loggedIn === false) {          // successful sign-out
+                            setStatus(data.message, 'ok');
+                            return;
+                        }
+                        applyResult(data);
+                        setStatus(data.message, 'ok');
+                    })
+                    .catch(function (err) { setStatus(err.message, 'err'); })
+                    .then(function () { fetchBtn.disabled = false; });
+            }
+
+            function applyResult(data) {
+                rows = data.attendance || [];
+                showProfile(data.profile || {});
+                document.getElementById('fetchedAt').textContent =
+                    'as of ' + new Date(data.fetchedAt).toLocaleString() +
+                    (data.usedSemester ? ' · semester ' + data.usedSemester : '');
+                if (data.usedSemester) { document.getElementById('aisSem').value = data.usedSemester; }
+                render(rows);
+                showSignedIn();
+            }
+
+            function showSignedIn() {
+                loginCard.classList.add('d-none');
+                resultCard.classList.remove('d-none');
+            }
+
+            function showSignedOut() {
+                rows = null;
+                resultCard.classList.add('d-none');
+                loginCard.classList.remove('d-none');
+                document.getElementById('aisPass').value = '';
+            }
+
+            // On load: if a sign-in is stored, show the cached result straight away
+            // and only hit AIS when there is nothing cached.
+            (function restore() {
+                var body = new FormData();
+                body.append('action', 'status');
+                fetch('ais.php', { method: 'POST', body: body })
+                    .then(function (r) { return r.json(); })
+                    .then(function (data) {
+                        if (!data.loggedIn) { return; }
+                        if (data.attendance && data.attendance.length) {
+                            applyResult(data);
+                            setStatus('Signed in as ' + data.aisUser + ' — showing last synced data.', 'ok');
+                        } else {
+                            var b = new FormData();
+                            b.append('action', 'fetch');
+                            send(b, 'Signed in — fetching your attendance...');
+                        }
+                    })
+                    .catch(function () { /* offline or backend down: leave the form visible */ });
+            })();
+
+            function setStatus(msg, kind) {
+                if (!msg) { statusEl.classList.add('d-none'); return; }
+                statusEl.className = 'ais-note mb-3' + (kind ? ' ' + kind : '');
+                statusEl.textContent = msg;
+            }
+
+            function showProfile(p) {
+                var html = '';
+                Object.keys(p).forEach(function (k) {
+                    html += '<span class="prof-item"><b>' + esc(k) + '</b>' + esc(p[k]) + '</span>';
+                });
+                document.getElementById('profile').innerHTML = html;
+            }
+
+            function render(list) {
+                var target = Math.min(100, Math.max(1, parseInt(targetEl.value, 10) || 75));
+                var t = target / 100;
+                var totHeld = 0, totAtt = 0;
+                list.forEach(function (r) { totHeld += r.held; totAtt += r.attended; });
+                var overall = totHeld ? (totAtt / totHeld) * 100 : 0;
+
+                document.getElementById('stats').innerHTML =
+                    box('Overall', totHeld ? overall.toFixed(2) + '%' : '—') +
+                    box('Attended', totAtt + ' / ' + totHeld) +
+                    box('Subjects', String(list.length));
+
+                var html = '<table class="ais-table"><thead><tr>' +
+                    '<th>Subject</th><th>Attended</th><th>Held</th><th>%</th><th>What it means</th>' +
+                    '</tr></thead><tbody>';
+
+                list.forEach(function (r) {
+                    var pct = r.held ? (r.attended / r.held) * 100 : 0;
+                    var cls = pct >= target ? 'ok' : (pct >= target - 10 ? 'warn' : 'bad');
+                    var advice;
+                    if (!r.held) {
+                        advice = 'No classes held yet.';
+                    } else if (pct >= target) {
+                        var skip = Math.floor(r.attended / t - r.held);
+                        advice = skip > 0 ? 'Can skip <b>' + skip + '</b> more' : 'On the edge — skip none';
+                    } else {
+                        advice = 'Attend <b>' + Math.ceil((t * r.held - r.attended) / (1 - t)) + '</b> in a row';
+                    }
+                    html += '<tr><td class="sub-name">' + esc(r.subject) +
+                        (r.code ? '<span class="sub-code">' + esc(r.code) + '</span>' : '') + '</td>' +
+                        '<td class="num">' + r.attended + '</td><td class="num">' + r.held + '</td>' +
+                        '<td class="num"><span class="pill ' + cls + '">' + pct.toFixed(1) + '%</span></td>' +
+                        '<td class="advice">' + advice + '</td></tr>';
+                });
+                document.getElementById('tableWrap').innerHTML = html + '</tbody></table>';
+            }
+
+            function showStructure(tables, forms) {
+                var parts = [];
+                (forms || []).forEach(function (f) {
+                    parts.push('FORM #' + f.form + '  ' + f.method.toUpperCase() + ' ' + (f.action || '(self)') +
+                        '\n  fields: ' + f.fields.join('\n          '));
+                });
+                (tables || []).forEach(function (t) {
+                    parts.push('TABLE #' + t.table + '  (' + t.rows + ' rows)\n' +
+                        '  header: ' + JSON.stringify(t.header) + '\n' +
+                        '  row1  : ' + JSON.stringify(t.first));
+                });
+                if (!parts.length) { return; }
+                statusEl.innerHTML += '<pre class="struct">' + esc(parts.join('\n\n')) + '</pre>';
+            }
+
+            function box(k, v) { return '<div class="stat-box"><div class="k">' + k + '</div><div class="v">' + v + '</div></div>'; }
+            function esc(s) {
+                return String(s).replace(/[&<>"]/g, function (c) {
+                    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+                });
+            }
+        })();
+    </script>
+</body>
+
+</html>
