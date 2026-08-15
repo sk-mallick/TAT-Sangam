@@ -722,29 +722,40 @@
             }
 
             /**
-             * The lanyard colour reports hostel status at a glance, the way a real
-             * campus uses different lanyards: deep green for a hostel resident,
-             * red otherwise. Drives the strap and the crimp together, since both
-             * derive their shading from --lanyard.
+             * The lanyard colour reports hostel status at a glance:
+             * • Deep green (#0d6938) if Hostel = Yes / Availing
+             * • Red (#e53935) if Hostel = No / Not availing / Unknown
+             * Drives the strap and the crimp together via --lanyard CSS variable.
              */
-            var LANYARD_HOSTEL = '#0f7a3d';      // deep green — availing
-            var LANYARD_DEFAULT = '#e53935';     // red — not availing / unknown
+            var LANYARD_HOSTEL = '#0d6938';      // deep green — hostel availing / yes
+            var LANYARD_DEFAULT = '#e53935';     // red — hostel not availing / no / unknown
 
-            function applyLanyardColour(fac) {
+            function applyLanyardColour(fac, profile, careerFields) {
                 var hanger = document.querySelector('.id-hanger');
                 if (!hanger) { return; }
 
+                var sources = [fac || {}, profile || {}, careerFields || {}];
                 var value = null;
-                Object.keys(fac || {}).forEach(function (k) {
-                    if (value === null && /hostel|accommodat|room/i.test(k)) {
-                        value = String(fac[k]).trim();
-                    }
-                });
-                var availing = value !== null &&
-                    /^(y|yes|true|1|availing|allotted|allocated)$/i.test(value);
 
-                hanger.style.setProperty('--lanyard', availing ? LANYARD_HOSTEL : LANYARD_DEFAULT);
-                hanger.dataset.hostel = availing ? 'yes' : 'no';
+                for (var i = 0; i < sources.length; i++) {
+                    var src = sources[i];
+                    var keys = Object.keys(src);
+                    for (var j = 0; j < keys.length; j++) {
+                        var k = keys[j];
+                        if (/hostel|accommodat|room/i.test(k)) {
+                            value = String(src[k]).trim();
+                            break;
+                        }
+                    }
+                    if (value !== null) { break; }
+                }
+
+                // Check if Yes / Availing vs No / Not availing
+                var isNo = value !== null && /(not\s*availing|no|n|false|0|none|day\s*scholar)/i.test(value);
+                var isYes = value !== null && !isNo && /(availing|yes|y|true|1|allotted|allocated|hosteller|resident)/i.test(value);
+
+                hanger.style.setProperty('--lanyard', isYes ? LANYARD_HOSTEL : LANYARD_DEFAULT);
+                hanger.dataset.hostel = isYes ? 'yes' : 'no';
             }
 
             // Bar widths derived from the registration number: same student, same barcode.
@@ -786,6 +797,7 @@
             // ───────── states ─────────
             function showLocalOnly() {
                 connected = false;
+                applyLanyardColour({}, {}, {});
                 renderCard(null, '', false);
                 renderContent(
                     [{ data: localUser || {} }], [],
@@ -803,6 +815,7 @@
                 connected = true;
                 var profile = data.profile || {};
                 var career = data.career || {};
+                applyLanyardColour(data.facilities, profile, career.fields);
                 renderCard(profile, data.photo, true);
 
                 // Order matters: AIS profile wins, career fills the gaps, local
